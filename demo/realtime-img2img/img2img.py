@@ -16,12 +16,17 @@ import torch
 from config import Args
 from pydantic import BaseModel, Field
 from PIL import Image
-import math
 
-base_model = "stabilityai/sd-turbo"
+# base_model = "stabilityai/sd-turbo"
+# base_model = "KBlueLeaf/kohaku-v2.1"
+base_model = r"D:\work\StreamDiffusion\models\Model\dreamshaper_8.safetensors"
 taesd_model = "madebyollin/taesd"
 
-default_prompt = "Portrait of The Joker halloween costume, face painting, with , glare pose, detailed, intricate, full of colour, cinematic lighting, trending on artstation, 8k, hyperrealistic, focused, extreme details, unreal engine 5 cinematic, masterpiece"
+# default_prompt = "1girl with brown dog ears, thick frame glasses"
+default_prompt = """
+cgmech, (realistic) solo, white mecha robot, cape, science fiction, torn clothes, glowing, standing, robot joints, mecha, armor, cowboy shot, (floating cape), intense sunlight, silver dragonborn, outdoors, landscape, nature , ((masterpiece, best quality)), <lora:cgmechmix_offset:1><lora:more_details:0.3> <lora:Niji:0.5><lora:dragonborn_offset:0.7> , volumetrics dtx, (film grain, blurry background, blurry foreground, bokeh, depth of field, motion blur:1.3)
+"""
+
 default_negative_prompt = "black and white, blurry, low resolution, pixelated,  pixel art, low quality, low fidelity"
 
 page_content = """<h1 class="text-3xl font-bold">StreamDiffusion</h1>
@@ -62,12 +67,8 @@ class Pipeline:
         #     field="textarea",
         #     id="negative_prompt",
         # )
-        width: int = Field(
-            512, min=2, max=15, title="Width", disabled=True, hide=True, id="width"
-        )
-        height: int = Field(
-            512, min=2, max=15, title="Height", disabled=True, hide=True, id="height"
-        )
+        width: int = Field(512, min=2, max=15, title="Width", disabled=True, hide=True, id="width")
+        height: int = Field(512, min=2, max=15, title="Height", disabled=True, hide=True, id="height")
 
     def __init__(self, args: Args, device: torch.device, torch_dtype: torch.dtype):
         params = self.InputParams()
@@ -89,8 +90,8 @@ class Pipeline:
             use_denoising_batch=True,
             cfg_type="none",
             use_safety_checker=args.safety_checker,
-            # enable_similar_image_filter=True,
-            # similar_image_filter_threshold=0.98,
+            enable_similar_image_filter=True,
+            similar_image_filter_threshold=0.98,
             engine_dir=args.engine_dir,
         )
 
