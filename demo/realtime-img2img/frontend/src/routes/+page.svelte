@@ -11,6 +11,7 @@
   import { lcmLiveStatus, lcmLiveActions, LCMLiveStatus } from '$lib/lcmLive';
   import { mediaStreamActions, onFrameChangeStore } from '$lib/mediaStream';
   import { getPipelineValues, deboucedPipelineValues } from '$lib/store';
+  import RobotInterface from '$lib/components/RobotInterface.svelte';
 
   let pipelineParams: Fields;
   let pipelineInfo: PipelineInfo;
@@ -20,6 +21,7 @@
   let currentQueueSize: number = 0;
   let queueCheckerRunning: boolean = false;
   let warningMessage: string = '';
+
   onMount(() => {
     getSettings();
   });
@@ -34,12 +36,14 @@
     console.log(pipelineParams);
     toggleQueueChecker(true);
   }
+
   function toggleQueueChecker(start: boolean) {
     queueCheckerRunning = start && maxQueueSize > 0;
     if (start) {
       getQueueSize();
     }
   }
+
   async function getQueueSize() {
     if (!queueCheckerRunning) {
       return;
@@ -61,7 +65,9 @@
   $: if ($lcmLiveStatus === LCMLiveStatus.TIMEOUT) {
     warningMessage = 'Session timed out. Please try again.';
   }
+
   let disabled = false;
+
   async function toggleLcmLive() {
     try {
       if (!isLCMRunning) {
@@ -88,65 +94,59 @@
   }
 </script>
 
-<svelte:head>
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.contentWindow.min.js"
-  ></script>
-</svelte:head>
+<main class="mx-auto max-w-6xl space-y-6 p-4">
+  <h1 class="mb-6 text-center text-3xl font-bold">Micro:bit Bluetooth コントローラー</h1>
 
-<main class="container mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4">
   <Warning bind:message={warningMessage}></Warning>
-  <article class="text-center">
-    {#if pageContent}
-      {@html pageContent}
-    {/if}
+  <section class="text-center">
     {#if maxQueueSize > 0}
-      <p class="text-sm">
-        There are <span id="queue_size" class="font-bold">{currentQueueSize}</span>
-        user(s) sharing the same GPU, affecting real-time performance. Maximum queue size is {maxQueueSize}.
+      <p class="text-sm text-gray-700">
+        Current queue size: <span class="font-semibold">{currentQueueSize}</span>. Max: {maxQueueSize}.
         <a
           href="https://huggingface.co/spaces/radames/Real-Time-Latent-Consistency-Model?duplicate=true"
           target="_blank"
-          class="text-blue-500 underline hover:no-underline">Duplicate</a
-        > and run it on your own GPU.
+          class="text-blue-500 underline hover:no-underline"
+        >
+          Duplicate
+        </a>
+        to run it on your own GPU.
       </p>
     {/if}
-  </article>
+  </section>
+
   {#if pipelineParams}
-    <article class="my-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <section class="grid gap-6 md:grid-cols-2">
       {#if isImageMode}
-        <div class="sm:col-start-1">
-          <VideoInput
-            width={Number(pipelineParams.width.default)}
-            height={Number(pipelineParams.height.default)}
-          ></VideoInput>
+        <div class="flex flex-col items-center">
+          <VideoInput width="512" height="512" class="rounded-md border shadow-md"></VideoInput>
         </div>
       {/if}
-      <div class={isImageMode ? 'sm:col-start-2' : 'col-span-2'}>
-        <ImagePlayer />
+      <div class={isImageMode ? 'col-start-2' : 'col-span-2'}>
+        <ImagePlayer class="rounded-md shadow-md"></ImagePlayer>
       </div>
-      <div class="sm:col-span-2">
-        <Button on:click={toggleLcmLive} {disabled} classList={'text-lg my-1 p-2'}>
+
+      <div class="col-span-2 flex flex-col items-center space-y-4">
+        <Button
+          on:click={toggleLcmLive}
+          {disabled}
+          class="w-full max-w-sm rounded-lg bg-blue-500 px-4 py-2 text-lg text-white shadow-md hover:bg-blue-600"
+        >
           {#if isLCMRunning}
             Stop
           {:else}
             Start
           {/if}
         </Button>
-        <PipelineOptions {pipelineParams}></PipelineOptions>
+        <div class="flex flex-wrap justify-center gap-4">
+          <RobotInterface />
+          <PipelineOptions {pipelineParams} class="w-full max-w-xl"></PipelineOptions>
+        </div>
       </div>
-    </article>
+    </section>
   {:else}
-    <!-- loading -->
-    <div class="flex items-center justify-center gap-3 py-48 text-2xl">
-      <Spinner classList={'animate-spin opacity-50'}></Spinner>
-      <p>Loading...</p>
+    <div class="flex flex-col items-center justify-center gap-4 py-32">
+      <Spinner class="animate-spin text-gray-400"></Spinner>
+      <p class="text-lg font-medium">Loading...</p>
     </div>
   {/if}
 </main>
-
-<style lang="postcss">
-  :global(html) {
-    @apply text-black dark:bg-gray-900 dark:text-white;
-  }
-</style>
