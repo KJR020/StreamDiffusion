@@ -17,15 +17,11 @@ from config import Args
 from pydantic import BaseModel, Field
 from PIL import Image
 
-# base_model = "stabilityai/sd-turbo"
-# base_model = "KBlueLeaf/kohaku-v2.1"
-base_model = r"D:\work\StreamDiffusion\models\Model\dreamshaper_8.safetensors"
+base_model = "stabilityai/sd-turbo"
 taesd_model = "madebyollin/taesd"
 
 # default_prompt = "1girl with brown dog ears, thick frame glasses"
-default_prompt = """
-cgmech, (realistic) solo, white mecha robot, cape, science fiction, torn clothes, glowing, standing, robot joints, mecha, armor, cowboy shot, (floating cape), intense sunlight, silver dragonborn, outdoors, landscape, nature , ((masterpiece, best quality)), <lora:cgmechmix_offset:1><lora:more_details:0.3> <lora:Niji:0.5><lora:dragonborn_offset:0.7> , volumetrics dtx, (film grain, blurry background, blurry foreground, bokeh, depth of field, motion blur:1.3)
-"""
+default_prompt = """cgmech, (realistic) solo, white mecha robot, cape, science fiction, torn clothes, glowing, standing, robot joints, mecha, armor, cowboy shot, (floating cape), intense sunlight, silver dragonborn, outdoors, landscape, nature , ((masterpiece, best qualityl), volumetrics dtx, (film grain, blurry background, blurry foreground, bokeh, depth of field, motion blur:1.3)"""
 
 default_negative_prompt = "black and white, blurry, low resolution, pixelated,  pixel art, low quality, low fidelity"
 
@@ -77,7 +73,7 @@ class Pipeline:
             use_tiny_vae=args.taesd,
             device=device,
             dtype=torch_dtype,
-            t_index_list=[35, 45],
+            t_index_list=[25, 45],
             frame_buffer_size=1,
             width=params.width,
             height=params.height,
