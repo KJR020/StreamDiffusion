@@ -10,6 +10,6 @@
 
 <style lang="postcss" scoped>
   .button {
-    @apply rounded bg-gray-700 font-normal text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300 dark:disabled:bg-gray-700 dark:disabled:text-black;
+    @apply rounded bg-blue-500 text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-blue-300;
   }
 </style>
