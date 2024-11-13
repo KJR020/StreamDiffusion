@@ -1,4 +1,8 @@
 <script lang="ts">
+  import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-svelte';
+  import Button from './Button.svelte';
+  import { writable } from 'svelte/store';
+
   const UART_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
   const UART_TX_CHARACTERISTIC_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
   const UART_RX_CHARACTERISTIC_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
@@ -7,9 +11,10 @@
   let server: BluetoothRemoteGATTServer | null = null;
   let rxCharacteristic: BluetoothRemoteGATTCharacteristic | null = null;
   let txCharacteristic;
-  let isConnected: boolean = false;
   let activeButton: HTMLElement | null = null;
   let logs: string[] = [];
+
+  const isConnected = writable(false);
 
   function addLog(message: string | null) {
     logs = [...logs, `${new Date().toLocaleTimeString()} ${message}`];
@@ -30,7 +35,7 @@
       await txCharacteristic.startNotifications();
       txCharacteristic.addEventListener('characteristicvaluechanged', handleNotifications);
 
-      isConnected = true;
+      isConnected.set(true);
       addLog('Bluetooth接続に成功しました');
     } catch (error) {
       addLog(`接続エラー: ${error}`);
@@ -40,8 +45,16 @@
   async function disconnectBluetooth() {
     if (isConnected) {
       server = await device.gatt.disconnect();
-      isConnected = false;
+      isConnected.set(false);
       addLog('Bluetooth接続を切断しました');
+    }
+  }
+
+  async function toggleBluetooth() {
+    if ($isConnected) {
+      await disconnectBluetooth();
+    } else {
+      await connectBluetooth();
     }
   }
 
@@ -51,7 +64,7 @@
   }
 
   async function sendCommand(command) {
-    if (!isConnected) {
+    if (!$isConnected) {
       addLog('接続されていません');
       return;
     }
@@ -77,169 +90,55 @@
   }
 </script>
 
-<div class="connection-status">
-  <span class="status-indicator" class:isConnected></span>
-  <span class="status-text">{isConnected ? '接続中' : '未接続'}</span>
+<div class="mx-auto grid grid-cols-3 gap-2">
+  <div class="bluetooth-controls">
+    <button
+      class={`aspect-square w-24 rounded p-4 text-xs text-white ${
+        isConnected ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
+      }`}
+      on:click={toggleBluetooth}
+    >
+      {isConnected ? '接続' : '接続解除'}
+    </button>
+  </div>
+  <div class="mx-auto grid max-w-[240px] grid-cols-3 gap-2">
+    <button
+      class={`flex aspect-square w-full items-center justify-center rounded-lg bg-gray-200 transition-colors hover:bg-gray-300`}
+      on:mousedown={() => handleButtonPress('w')}
+      on:mouseup={handleButtonRelease}
+    >
+      <ArrowUp class="h-6 w-6" />
+    </button>
+    <button
+      class={`flex aspect-square w-full items-center justify-center rounded-lg bg-gray-200 transition-colors hover:bg-gray-300`}
+      on:mousedown={() => handleButtonPress('s')}
+      on:mouseup={handleButtonRelease}
+    >
+      <ArrowDown class="h-6 w-6" />
+    </button>
+    <button
+      class={`flex aspect-square w-full items-center justify-center rounded-lg bg-gray-200 transition-colors hover:bg-gray-300`}
+      on:mousedown={() => handleButtonPress('a')}
+      on:mouseup={handleButtonRelease}
+    >
+      <ArrowLeft class="h-6 w-6" />
+    </button>
+    <button
+      class={`flex aspect-square w-full items-center justify-center rounded-lg bg-gray-200 transition-colors hover:bg-gray-300`}
+      on:mousedown={() => handleButtonPress('d')}
+      on:mouseup={handleButtonRelease}
+    >
+      <ArrowRight class="h-6 w-6" />
+    </button>
+  </div>
+  <div class="col-span-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+    <div class="mb-2 flex items-center justify-between">
+      <h2 class="flex items-center text-sm font-medium text-gray-700">ログ</h2>
+    </div>
+    <div class="log-container max-h-64 overflow-auto bg-gray-100 p-4">
+      {#each logs as log}
+        <div class="py-1 text-sm">{log}</div>
+      {/each}
+    </div>
+  </div>
 </div>
-
-<div class="bluetooth-controls">
-  <button class="bluetooth-button connect" on:click={connectBluetooth}>Bluetooth接続</button>
-  <button class="bluetooth-button disconnect" on:click={disconnectBluetooth}>接続解除</button>
-</div>
-
-<div class="controller">
-  <button
-    class="button up"
-    on:mousedown={() => handleButtonPress('w')}
-    on:mouseup={handleButtonRelease}>↑</button
-  >
-  <button
-    class="button down"
-    on:mousedown={() => handleButtonPress('s')}
-    on:mouseup={handleButtonRelease}>↓</button
-  >
-  <button
-    class="button left"
-    on:mousedown={() => handleButtonPress('a')}
-    on:mouseup={handleButtonRelease}>←</button
-  >
-  <button
-    class="button right"
-    on:mousedown={() => handleButtonPress('d')}
-    on:mouseup={handleButtonRelease}>→</button
-  >
-</div>
-
-<div id="log">
-  {#each logs as log}
-    <p>{log}</p>
-  {/each}
-</div>
-
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    text-align: center;
-  }
-
-  h1 {
-    color: #333;
-    margin-bottom: 30px;
-  }
-
-  .controller {
-    display: inline-block;
-    position: relative;
-    width: 240px;
-    height: 240px;
-  }
-
-  .button {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    background: #f0f0f0;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-  }
-
-  .button:hover {
-    background: #e0e0e0;
-  }
-
-  .button.active {
-    background: #4a90e2;
-    color: white;
-  }
-
-  .up {
-    top: 0;
-    left: 90px;
-  }
-  .down {
-    bottom: 0;
-    left: 90px;
-  }
-  .left {
-    top: 90px;
-    left: 0;
-  }
-  .right {
-    top: 90px;
-    right: 0;
-  }
-
-  .bluetooth-controls {
-    margin: 20px 0;
-  }
-
-  .bluetooth-button {
-    padding: 10px 20px;
-    margin: 0 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  .connect {
-    background: #4caf50;
-    color: white;
-  }
-
-  .disconnect {
-    background: #f44336;
-    color: white;
-  }
-
-  .bluetooth-button:hover {
-    opacity: 0.9;
-  }
-
-  .connection-status {
-    margin: 10px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .status-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: #ff4444;
-    transition: background-color 0.3s;
-  }
-
-  .status-indicator.connected {
-    background-color: #4caf50;
-  }
-
-  #log {
-    margin-top: 20px;
-    padding: 10px;
-    background: #f5f5f5;
-    border-radius: 5px;
-    height: 200px;
-    overflow-y: auto;
-    text-align: left;
-    border: 1px solid #ddd;
-    font-family: monospace;
-  }
-
-  #log p {
-    margin: 5px 0;
-    padding: 2px 0;
-    border-bottom: 1px solid #eee;
-  }
-</style>

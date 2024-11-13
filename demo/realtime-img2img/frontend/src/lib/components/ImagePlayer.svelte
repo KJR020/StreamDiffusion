@@ -21,30 +21,26 @@
   }
 </script>
 
-<div
-  class="relative mx-auto aspect-square max-w-lg self-center overflow-hidden rounded-lg border border-slate-300"
->
-  <!-- svelte-ignore a11y-missing-attribute -->
-  {#if isLCMRunning && $streamId}
-    <img
-      bind:this={imageEl}
-      class="aspect-square w-full rounded-lg"
-      src={'/api/stream/' + $streamId}
-    />
-    <div class="absolute bottom-1 right-1">
-      <Button
-        on:click={takeSnapshot}
-        disabled={!isLCMRunning}
-        title={'Take Snapshot'}
-        classList={'text-sm ml-auto text-white p-1 shadow-lg rounded-lg opacity-50'}
-      >
-        <Floppy classList={''} />
-      </Button>
-    </div>
-  {:else}
-    <img
-      class="aspect-square w-full rounded-lg"
-      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
-    />
-  {/if}
-</div>
+<!-- svelte-ignore a11y-missing-attribute -->
+{#if isLCMRunning && $streamId}
+  <img
+    bind:this={imageEl}
+    class="aspect-square w-full rounded-lg"
+    src={'/api/stream/' + $streamId}
+  />
+  <div class="absolute bottom-1 right-1">
+    <Button
+      on:click={takeSnapshot}
+      disabled={!isLCMRunning}
+      title={'Take Snapshot'}
+      classList={'text-sm ml-auto text-white p-1 rounded opacity-50'}
+    >
+      <Floppy classList={''} />
+    </Button>
+  </div>
+{:else}
+  <img
+    class="aspect-square w-full rounded-lg bg-gray-50"
+    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+  />
+{/if}

@@ -12,6 +12,7 @@
   import { mediaStreamActions, onFrameChangeStore } from '$lib/mediaStream';
   import { getPipelineValues, deboucedPipelineValues } from '$lib/store';
   import RobotInterface from '$lib/components/RobotInterface.svelte';
+  import { Pause, Play } from 'lucide-svelte';
 
   let pipelineParams: Fields;
   let pipelineInfo: PipelineInfo;
@@ -53,7 +54,7 @@
     setTimeout(getQueueSize, 10000);
   }
 
-  function getSreamdata() {
+  function getStreamData() {
     if (isImageMode) {
       return [getPipelineValues(), $onFrameChangeStore?.blob];
     } else {
@@ -76,7 +77,7 @@
           await mediaStreamActions.start();
         }
         disabled = true;
-        await lcmLiveActions.start(getSreamdata);
+        await lcmLiveActions.start(getStreamData);
         disabled = false;
         toggleQueueChecker(false);
       } else {
@@ -94,59 +95,38 @@
   }
 </script>
 
-<main class="mx-auto max-w-6xl space-y-6 p-4">
-  <h1 class="mb-6 text-center text-3xl font-bold">Micro:bit Bluetooth コントローラー</h1>
+<main class="mx-auto space-y-6 p-4">
+  <h1 class="mb-6 text-center text-3xl font-bold">Micro:bit x StreamDiffusion</h1>
 
   <Warning bind:message={warningMessage}></Warning>
-  <section class="text-center">
-    {#if maxQueueSize > 0}
-      <p class="text-sm text-gray-700">
-        Current queue size: <span class="font-semibold">{currentQueueSize}</span>. Max: {maxQueueSize}.
-        <a
-          href="https://huggingface.co/spaces/radames/Real-Time-Latent-Consistency-Model?duplicate=true"
-          target="_blank"
-          class="text-blue-500 underline hover:no-underline"
-        >
-          Duplicate
-        </a>
-        to run it on your own GPU.
-      </p>
-    {/if}
-  </section>
-
-  {#if pipelineParams}
-    <section class="grid gap-6 md:grid-cols-2">
-      {#if isImageMode}
-        <div class="flex flex-col items-center">
-          <VideoInput width="512" height="512" class="rounded-md border shadow-md"></VideoInput>
-        </div>
-      {/if}
-      <div class={isImageMode ? 'col-start-2' : 'col-span-2'}>
-        <ImagePlayer class="rounded-md shadow-md"></ImagePlayer>
+  <section class="grid gap-6 md:grid-cols-2">
+    <div class="col-span-1 flex justify-end">
+      <div class="w-5/12 rounded-md">
+        <VideoInput width={512} height={512}></VideoInput>
       </div>
-
-      <div class="col-span-2 flex flex-col items-center space-y-4">
-        <Button
-          on:click={toggleLcmLive}
-          {disabled}
-          class="w-full max-w-sm rounded-lg bg-blue-500 px-4 py-2 text-lg text-white shadow-md hover:bg-blue-600"
-        >
-          {#if isLCMRunning}
-            Stop
-          {:else}
-            Start
-          {/if}
-        </Button>
-        <div class="flex flex-wrap justify-center gap-4">
-          <RobotInterface />
-          <PipelineOptions {pipelineParams} class="w-full max-w-xl"></PipelineOptions>
-        </div>
-      </div>
-    </section>
-  {:else}
-    <div class="flex flex-col items-center justify-center gap-4 py-32">
-      <Spinner class="animate-spin text-gray-400"></Spinner>
-      <p class="text-lg font-medium">Loading...</p>
     </div>
-  {/if}
+    <div class="col-span-1 flex justify-start">
+      <div class="w-5/12 rounded-md">
+        <ImagePlayer></ImagePlayer>
+      </div>
+    </div>
+    <div class="col-span-2 flex flex-col items-center">
+      <Button on:click={toggleLcmLive} {disabled} classList={'h-8 w-8 max-w-sm'}>
+        {#if isLCMRunning}
+          <Pause class="ml-1 h-6 w-6"></Pause>
+        {:else}
+          <Play class="ml-1 h-6 w-6"></Play>
+        {/if}
+      </Button>
+      {#if pipelineParams}
+        <PipelineOptions {pipelineParams} class="w-full max-w-xl"></PipelineOptions>
+      {/if}
+    </div>
+    <div class="col-span-2 flex justify-center">
+      <div class="w-4/6 rounded-md">
+        <RobotInterface />
+        <div class="w-4/6 rounded-md"></div>
+      </div>
+    </div>
+  </section>
 </main>

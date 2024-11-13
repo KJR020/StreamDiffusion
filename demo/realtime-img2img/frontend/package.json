@@ -35,6 +35,8 @@
   },
   "type": "module",
   "dependencies": {
+    "@types/web-bluetooth": "^0.0.20",
+    "lucide-svelte": "^0.456.0",
     "piexifjs": "^1.0.6",
     "rvfc-polyfill": "^1.0.7"
   }
