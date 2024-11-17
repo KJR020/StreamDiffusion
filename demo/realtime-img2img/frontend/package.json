@@ -36,6 +36,8 @@
   "type": "module",
   "dependencies": {
     "@types/web-bluetooth": "^0.0.20",
+    "flowbite": "^2.5.2",
+    "flowbite-svelte": "^0.47.3",
     "lucide-svelte": "^0.456.0",
     "piexifjs": "^1.0.6",
     "rvfc-polyfill": "^1.0.7"

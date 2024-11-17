@@ -6,13 +6,14 @@
   import VideoInput from '$lib/components/VideoInput.svelte';
   import Button from '$lib/components/Button.svelte';
   import PipelineOptions from '$lib/components/PipelineOptions.svelte';
-  import Spinner from '$lib/icons/spinner.svelte';
   import Warning from '$lib/components/Warning.svelte';
   import { lcmLiveStatus, lcmLiveActions, LCMLiveStatus } from '$lib/lcmLive';
   import { mediaStreamActions, onFrameChangeStore } from '$lib/mediaStream';
-  import { getPipelineValues, deboucedPipelineValues } from '$lib/store';
+  import { getPipelineValues, deboucedPipelineValues, addLog } from '$lib/store';
   import RobotInterface from '$lib/components/RobotInterface.svelte';
   import { Pause, Play } from 'lucide-svelte';
+  import LogConsole from '$lib/components/LogConsole.svelte';
+  import { Card } from 'flowbite-svelte';
 
   let pipelineParams: Fields;
   let pipelineInfo: PipelineInfo;
@@ -28,6 +29,7 @@
   });
 
   async function getSettings() {
+    addLog('Loading Model settings...');
     const settings = await fetch('/api/settings').then((r) => r.json());
     pipelineParams = settings.input_params.properties;
     pipelineInfo = settings.info.properties;
@@ -65,6 +67,7 @@
   $: isLCMRunning = $lcmLiveStatus !== LCMLiveStatus.DISCONNECTED;
   $: if ($lcmLiveStatus === LCMLiveStatus.TIMEOUT) {
     warningMessage = 'Session timed out. Please try again.';
+    addLog(warningMessage);
   }
 
   let disabled = false;
@@ -89,6 +92,7 @@
       }
     } catch (e) {
       warningMessage = e instanceof Error ? e.message : '';
+      addLog(warningMessage);
       disabled = false;
       toggleQueueChecker(true);
     }
@@ -101,31 +105,39 @@
   <Warning bind:message={warningMessage}></Warning>
   <section class="grid gap-6 md:grid-cols-2">
     <div class="col-span-1 flex justify-end">
-      <div class="w-5/12 rounded-md">
-        <VideoInput width={512} height={512}></VideoInput>
+      <div class="w-10/12 max-w-lg rounded-lg">
+        <Card>
+          <h2 class="text-sm font-medium text-gray-700">カメラ映像</h2>
+          <VideoInput width={512} height={512}></VideoInput>
+        </Card>
       </div>
     </div>
     <div class="col-span-1 flex justify-start">
-      <div class="w-5/12 rounded-md">
-        <ImagePlayer></ImagePlayer>
+      <div class="w-10/12 max-w-lg rounded-lg">
+        <Card>
+          <h2 class="text-sm font-medium text-gray-700">生成画像</h2>
+          <ImagePlayer></ImagePlayer>
+        </Card>
       </div>
     </div>
-    <div class="col-span-2 flex flex-col items-center">
-      <Button on:click={toggleLcmLive} {disabled} classList={'h-8 w-8 max-w-sm'}>
-        {#if isLCMRunning}
-          <Pause class="ml-1 h-6 w-6"></Pause>
-        {:else}
-          <Play class="ml-1 h-6 w-6"></Play>
-        {/if}
-      </Button>
-      {#if pipelineParams}
-        <PipelineOptions {pipelineParams} class="w-full max-w-xl"></PipelineOptions>
-      {/if}
-    </div>
     <div class="col-span-2 flex justify-center">
-      <div class="w-4/6 rounded-md">
+      <div class="flex w-10/12 justify-center gap-6">
         <RobotInterface />
-        <div class="w-4/6 rounded-md"></div>
+        {#if pipelineParams}
+          <PipelineOptions {pipelineParams} class="w-full max-w-xl"></PipelineOptions>
+        {/if}
+        <Button on:click={toggleLcmLive} {disabled} classList={'h-8 w-8 max-w-sm'}>
+          {#if isLCMRunning}
+            <Pause class="ml-1 h-6 w-6"></Pause>
+          {:else}
+            <Play class="ml-1 h-6 w-6"></Play>
+          {/if}
+        </Button>
+      </div>
+    </div>
+    <div class="col-span-2">
+      <div class="flex justify-center">
+        <LogConsole />
       </div>
     </div>
   </section>

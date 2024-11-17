@@ -5,11 +5,11 @@ export default defineConfig({
   plugins: [sveltekit()],
   server: {
     proxy: {
-      '/api': 'http://localhost:7860',
+      '/api': 'http://192.168.0.23:7860',
       '/api/ws': {
-        target: 'ws://localhost:7860',
+        target: 'ws://192.168.0.23:7860',
         ws: true
       }
-    },
+    }
   }
 });
