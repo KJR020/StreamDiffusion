@@ -3,10 +3,10 @@
   import { FieldType } from '$lib/types';
   import InputRange from './InputRange.svelte';
   import SeedInput from './SeedInput.svelte';
-  import TextArea from './TextArea.svelte';
   import Checkbox from './Checkbox.svelte';
   import Selectlist from './Selectlist.svelte';
   import { pipelineValues } from '$lib/store';
+  import { Textarea } from 'flowbite-svelte';
 
   export let pipelineParams: Fields;
 
@@ -14,6 +14,7 @@
     (e) => e?.hide == true && e?.disabled !== true
   );
   $: featuredOptions = Object.values(pipelineParams)?.filter((e) => e?.hide !== true);
+  console.log(pipelineParams);
 </script>
 
 <div class="flex flex-col gap-3">
@@ -25,7 +26,9 @@
         {:else if params.field === FieldType.SEED}
           <SeedInput {params} bind:value={$pipelineValues[params.id]}></SeedInput>
         {:else if params.field === FieldType.TEXTAREA}
-          <TextArea {params} bind:value={$pipelineValues[params.id]}></TextArea>
+          <Textarea rows={4} value={$pipelineValues[params.id]}
+            >{$pipelineValues[params.id]}</Textarea
+          >
         {:else if params.field === FieldType.CHECKBOX}
           <Checkbox {params} bind:value={$pipelineValues[params.id]}></Checkbox>
         {:else if params.field === FieldType.SELECT}
@@ -48,7 +51,8 @@
           {:else if params.field === FieldType.SEED}
             <SeedInput {params} bind:value={$pipelineValues[params.id]}></SeedInput>
           {:else if params.field === FieldType.TEXTAREA}
-            <TextArea {params} bind:value={$pipelineValues[params.id]}></TextArea>
+            <!-- <TextArea {params} bind:value={$pipelineValues[params.id]}></TextArea> -->
+            <Textarea bind:value={$pipelineValues[params.id]}></Textarea>
           {:else if params.field === FieldType.CHECKBOX}
             <Checkbox {params} bind:value={$pipelineValues[params.id]}></Checkbox>
           {:else if params.field === FieldType.SELECT}

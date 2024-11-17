@@ -1,6 +1,6 @@
 <script lang="ts">
+  import { addLog } from '$lib/store';
   import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-svelte';
-  import Button from './Button.svelte';
   import { writable } from 'svelte/store';
 
   const UART_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
@@ -12,13 +12,8 @@
   let rxCharacteristic: BluetoothRemoteGATTCharacteristic | null = null;
   let txCharacteristic;
   let activeButton: HTMLElement | null = null;
-  let logs: string[] = [];
 
   const isConnected = writable(false);
-
-  function addLog(message: string | null) {
-    logs = [...logs, `${new Date().toLocaleTimeString()} ${message}`];
-  }
 
   async function connectBluetooth() {
     try {
@@ -60,20 +55,20 @@
 
   function handleNotifications(event) {
     const value = new TextDecoder().decode(event.target.value);
-    addLog(`受信: ${value}`);
+    addLog(`[Microbit] 受信: ${value}`);
   }
 
   async function sendCommand(command) {
     if (!$isConnected) {
-      addLog('接続されていません');
+      addLog('[Microbit] Bluetooth未接続');
       return;
     }
 
     try {
       await rxCharacteristic.writeValue(new TextEncoder().encode(command + '\n'));
-      addLog(`送信: ${command}`);
+      addLog(`[Microbit] 送信: ${command}`);
     } catch (error) {
-      addLog(`送信エラー: ${error}`);
+      addLog(`[Microbit] 送信エラー: ${error}`);
     }
   }
 
@@ -90,55 +85,50 @@
   }
 </script>
 
-<div class="mx-auto grid grid-cols-3 gap-2">
-  <div class="bluetooth-controls">
+<div class="grid grid-cols-2 gap-2">
+  <div class="col-span-1 flex justify-end">
     <button
-      class={`aspect-square w-24 rounded p-4 text-xs text-white ${
-        isConnected ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
-      }`}
       on:click={toggleBluetooth}
+      class={`aspect-square w-20 rounded-lg p-4 text-xs ${
+        $isConnected ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+      } text-white`}
     >
-      {isConnected ? '接続' : '接続解除'}
+      {$isConnected ? 'Bluetooth切断' : 'Bluetooth接続'}
     </button>
   </div>
-  <div class="mx-auto grid max-w-[240px] grid-cols-3 gap-2">
+  <div class="col-span-1 mx-auto grid max-w-[240px] grid-cols-3 gap-2">
+    <div></div>
+    <!-- 中央の空セル -->
     <button
-      class={`flex aspect-square w-full items-center justify-center rounded-lg bg-gray-200 transition-colors hover:bg-gray-300`}
+      class="flex aspect-square w-full items-center justify-center rounded-lg bg-gray-200 transition-colors hover:bg-gray-300"
       on:mousedown={() => handleButtonPress('w')}
       on:mouseup={handleButtonRelease}
     >
       <ArrowUp class="h-6 w-6" />
     </button>
+    <div></div>
     <button
-      class={`flex aspect-square w-full items-center justify-center rounded-lg bg-gray-200 transition-colors hover:bg-gray-300`}
-      on:mousedown={() => handleButtonPress('s')}
-      on:mouseup={handleButtonRelease}
-    >
-      <ArrowDown class="h-6 w-6" />
-    </button>
-    <button
-      class={`flex aspect-square w-full items-center justify-center rounded-lg bg-gray-200 transition-colors hover:bg-gray-300`}
+      class="flex aspect-square w-full items-center justify-center rounded-lg bg-gray-200 transition-colors hover:bg-gray-300"
       on:mousedown={() => handleButtonPress('a')}
       on:mouseup={handleButtonRelease}
     >
       <ArrowLeft class="h-6 w-6" />
     </button>
+    <div></div>
     <button
-      class={`flex aspect-square w-full items-center justify-center rounded-lg bg-gray-200 transition-colors hover:bg-gray-300`}
+      class="flex aspect-square w-full items-center justify-center rounded-lg bg-gray-200 transition-colors hover:bg-gray-300"
       on:mousedown={() => handleButtonPress('d')}
       on:mouseup={handleButtonRelease}
     >
       <ArrowRight class="h-6 w-6" />
     </button>
-  </div>
-  <div class="col-span-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
-    <div class="mb-2 flex items-center justify-between">
-      <h2 class="flex items-center text-sm font-medium text-gray-700">ログ</h2>
-    </div>
-    <div class="log-container max-h-64 overflow-auto bg-gray-100 p-4">
-      {#each logs as log}
-        <div class="py-1 text-sm">{log}</div>
-      {/each}
-    </div>
+    <div></div>
+    <button
+      class="flex aspect-square w-full items-center justify-center rounded-lg bg-gray-200 transition-colors hover:bg-gray-300"
+      on:mousedown={() => handleButtonPress('s')}
+      on:mouseup={handleButtonRelease}
+    >
+      <ArrowDown class="h-6 w-6" />
+    </button>
   </div>
 </div>

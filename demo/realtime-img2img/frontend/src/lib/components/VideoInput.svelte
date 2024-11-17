@@ -6,8 +6,7 @@
     mediaStreamStatus,
     MediaStreamStatusEnum,
     onFrameChangeStore,
-    mediaStream,
-    mediaDevices
+    mediaStream
   } from '$lib/mediaStream';
   import MediaListSwitcher from './MediaListSwitcher.svelte';
   export let width = 512;
@@ -77,12 +76,12 @@
   }
 </script>
 
-<div class="relative z-10 flex aspect-square w-full bg-gray-50 object-cover">
+<div class="relative z-10 flex aspect-square w-full rounded-lg bg-gray-50 object-cover">
   <div class="absolute bottom-0 right-0 z-10">
     <MediaListSwitcher />
   </div>
   <video
-    class="pointer-events-none absolute right-0 aspect-square w-full object-cover"
+    class="pointer-events-none absolute right-0 aspect-square w-full rounded-lg object-cover"
     bind:this={videoEl}
     on:loadeddata={() => {
       videoIsReady = true;
@@ -92,6 +91,8 @@
     muted
     loop
   ></video>
-  <canvas bind:this={canvasEl} class="absolute right-0 top-0 aspect-square w-full object-cover"
+  <canvas
+    bind:this={canvasEl}
+    class="absolute right-0 top-0 aspect-square w-full rounded-lg object-cover"
   ></canvas>
 </div>
